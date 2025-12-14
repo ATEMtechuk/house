@@ -7,62 +7,36 @@ import * as THREE from 'three';
 
 // Room descriptions for Telos House
 const roomDescriptions: { [key: string]: string } = {
-  room1: 'Room 1 - First space in Telos House',
-  room2: 'Room 2 - Second space in Telos House',
-  room3: 'Room 3 - Third space in Telos House',
-  room4: 'Room 4 - Fourth space in Telos House',
-  room5: 'Room 5 - Fifth space in Telos House',
-  room6: 'Room 6 - Sixth space in Telos House',
-  room7: 'Room 7 - Seventh space in Telos House',
-  room8: 'Room 8 - Eighth space in Telos House',
-  room9: 'Room 9 - Ninth space in Telos House',
-  room10: 'Room 10 - Tenth space in Telos House',
-  room11: 'Room 11 - Eleventh space in Telos House',
+  gallery: 'A collaboration space for trade of ideas and knowledge.',
+  bathroom1: 'The birth of the most innovative ideas come from when people are alone with their minds.',
+  hardwareLab: 'Where the ideas are actualised and brought into life.',
+  techRoom: 'Where our hardest workers spend their time with their heads down.',
+  hallway: 'The trunk of the tree, the start of endless possibilities.',
+  library: 'An endless resource of wisdom that encapsulates the ideas from hundreds of countless freethinkers throughout human history.',
+  closet: 'A resource that keeps our founders looking fit for any occasion that might meet them.',
+  bathroom2: 'The birth of the most innovative ideas come from when people are alone with their minds.',
+  warroomServerHub: 'A place for strategizing collective ideas/ Where the online identity of our ideas is kept alive.',
+  bathroom3: 'The birth of the most innovative ideas come from when people are alone with their minds.',
+  kitchen: 'Fuel for the bellies is a great opportunity for further collaborative discussion and a break to keep everyone motivated.',
 };
 
-// Manual room configuration - YOU CAN EDIT THESE VALUES
-// Each room has: position (x, y, z), and size (width, height, depth)
-// All values are relative to the house center (0, 0, 0)
-// Adjust these to match your actual house layout
 interface RoomConfig {
-  position: [number, number, number]; // [x, y, z]
-  size: [number, number, number]; // [width, height, depth]
+  position: [number, number, number];
+  size: [number, number, number];
 }
 
 const manualRoomPositions: { [key: string]: RoomConfig } = {
-  // Based on your Blender layout drawing
-  // Room 1 - Large room on the right (red outline)
-  room1: { position: [0, 1, -4.01], size: [5.7, 1.7, 8] },
-
-  // Room 2 - Small room bottom right (orange)
-  room2: { position: [3.75, 1, -1.6], size: [1.7, 1.7, 2.5] },
-
-  // Room 3 - Green room (bottom middle)
-  room3: { position: [3.4, 1, 0.8], size: [2.55, 1.7, 2.2] },
-
-  // Room 4 - Purple room (bottom left)
-  room4: { position: [3.4, 1, 3.6], size: [2.6, 1.7, 3.5] },
-
-  // Room 5 - Yellow room (middle left)
-  room5: { position: [1.4, 1, 2.8], size: [1.3, 1.7, 5.5] },
-
-  // Room 6 - Gray room (top middle left)
-  room6: { position: [-1.1, 1, 1.3], size: [3.5, 1.7, 2.2] },
-
-  // Room 7 - Closet (top left, small)
-  room7: { position: [-0.5, 1, 3.55], size: [1.5, 1.7, 1.95] },
-
-  // Room 8 - Purple "room 8" (top left)
-  room8: { position: [-2.05, 1, 3.7], size: [1.5, 1.7, 2.4] },
-
-  // Room 9 - Pink "Room 9" (far top left)
-  room9: { position: [-0.55, 1, 7], size: [2.75, 1.7, 2.4] },
-
-  // Room 10 - "Room 10" (very top left)
-  room10: { position: [-2.5, 1, 6.155], size: [0.7, 1.7, 2.3] },
-
-  // Room 11 - Next to Room 1
-  room11: { position: [3.7, 1, -5.5], size: [1.7, 1.7, 5.1] },
+  gallery: { position: [0, 1, -4.01], size: [5.7, 1.7, 8] },
+  bathroom1: { position: [3.75, 1, -1.6], size: [1.7, 1.7, 2.5] },
+  hardwareLab: { position: [3.4, 1, 0.8], size: [2.55, 1.7, 2.2] },
+  techRoom: { position: [3.4, 1, 3.6], size: [2.6, 1.7, 3.5] },
+  hallway: { position: [1.4, 1, 2.8], size: [1.3, 1.7, 5.5] },
+  library: { position: [-1.1, 1, 1.3], size: [3.5, 1.7, 2.2] },
+  closet: { position: [-0.5, 1, 3.55], size: [1.5, 1.7, 1.95] },
+  bathroom2: { position: [-2.05, 1, 3.7], size: [1.5, 1.7, 2.4] },
+  warroomServerHub: { position: [-0.55, 1, 7], size: [2.75, 1.7, 2.4] },
+  bathroom3: { position: [-2.5, 1, 6.155], size: [0.7, 1.7, 2.3] },
+  kitchen: { position: [3.7, 1, -5.5], size: [1.7, 1.7, 5.1] },
 };
 
 interface HouseModelProps {
@@ -82,43 +56,31 @@ function HouseModel({ onRoomClick, onModelClick, isZoomed, hoveredRoom, setHover
   const startRotationRef = useRef(0);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    // Ignore right-clicks
     if (event.nativeEvent.button !== 0) return;
 
     event.stopPropagation();
 
-    // Store current rotation BEFORE any action
     if (groupRef.current) {
       startRotationRef.current = groupRef.current.rotation.y;
     }
 
-    // Get the clicked object
     const object = event.object;
-
-    // Check if this object has an assigned room name
     const roomName = object.userData.roomName;
 
     if (roomName && object instanceof THREE.Mesh) {
-      // Calculate room center position
       const boundingBox = new THREE.Box3().setFromObject(object);
       const center = new THREE.Vector3();
       boundingBox.getCenter(center);
 
-      // Convert to world position with scaling
-      const worldPos = center.multiplyScalar(4); // Account for 4x scale
+      const worldPos = center.multiplyScalar(4);
 
       onRoomClick(roomName, worldPos);
-    } else {
-      // If no specific room clicked, trigger aerial view
-      onModelClick();
     }
   };
 
   const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     const object = event.object;
-
-    // Check if this object has an assigned room name
     const roomName = object.userData.roomName;
 
     if (roomName) {
@@ -204,13 +166,13 @@ function HouseModel({ onRoomClick, onModelClick, isZoomed, hoveredRoom, setHover
       const [x, y, z] = config.position;
       const [width, height, depth] = config.size;
 
-      // Create a visible semi-transparent box mesh for this room
+      // Create an invisible box mesh for this room (visible only on hover)
       const boxGeometry = new THREE.BoxGeometry(width, height, depth);
       const boxMaterial = new THREE.MeshStandardMaterial({
         transparent: true,
-        opacity: 0.2, // Always visible so you can see where rooms are
+        opacity: 0, // Invisible by default
         emissive: new THREE.Color(0x4444ff),
-        emissiveIntensity: 0.3,
+        emissiveIntensity: 0,
         wireframe: false // Set to true to see just the edges
       });
 
@@ -235,10 +197,10 @@ function HouseModel({ onRoomClick, onModelClick, isZoomed, hoveredRoom, setHover
       const material = mesh.material as THREE.MeshStandardMaterial;
       if (hoveredRoom === roomName) {
         material.emissiveIntensity = 0.8; // Much brighter when hovered
-        material.opacity = 0.5; // More visible when hovered
+        material.opacity = 0.5; // Visible when hovered
       } else {
-        material.emissiveIntensity = 0.3; // Base glow
-        material.opacity = 0.2; // Always slightly visible so you can see room positions
+        material.emissiveIntensity = 0; // No glow when not hovered
+        material.opacity = 0; // Completely invisible when not hovered
       }
     });
   }, [hoveredRoom, roomMeshes]);
@@ -268,9 +230,10 @@ interface CameraControllerProps {
   isZoomed: boolean;
   roomPosition: THREE.Vector3 | null;
   setRotationProgress: (progress: number) => void;
+  isSwitchingRooms: boolean;
 }
 
-function CameraController({ isZoomed, roomPosition, setRotationProgress }: CameraControllerProps) {
+function CameraController({ isZoomed, roomPosition, setRotationProgress, isSwitchingRooms }: CameraControllerProps) {
   const { camera } = useThree();
 
   useEffect(() => {
@@ -281,24 +244,35 @@ function CameraController({ isZoomed, roomPosition, setRotationProgress }: Camer
       let isResetting = false;
 
       if (roomPosition) {
-        // Zoom to specific room - position camera above and slightly offset
-        endPos = new THREE.Vector3(
-          roomPosition.x,
-          roomPosition.y + 3,
-          roomPosition.z + 2
+        const distanceFromCenter = Math.sqrt(
+          roomPosition.x * roomPosition.x +
+          roomPosition.z * roomPosition.z
         );
+
+        const isCornerRoom = distanceFromCenter > 10;
+
+        if (isCornerRoom) {
+          endPos = new THREE.Vector3(
+            roomPosition.x * 0.5,
+            roomPosition.y + 10,
+            roomPosition.z * 0.5
+          );
+        } else {
+          endPos = new THREE.Vector3(
+            roomPosition.x,
+            roomPosition.y + 5,
+            roomPosition.z + 3
+          );
+        }
       } else if (isZoomed) {
-        // Aerial view of whole house
-        endPos = new THREE.Vector3(0, 8, 0);
+        endPos = new THREE.Vector3(0, 12, 0);
       } else {
-        // Default view - RESET (fast animation)
         endPos = new THREE.Vector3(10, 8, 10);
         isResetting = true;
       }
 
-      // Fast reset (300ms) vs normal animation (1000ms)
-      const rotationDuration = isResetting ? 150 : 800;
-      const cameraDuration = isResetting ? 300 : 1000;
+      const rotationDuration = isResetting ? 150 : (isSwitchingRooms ? 0 : 800);
+      const cameraDuration = isResetting ? 300 : (isSwitchingRooms ? 300 : 1000);
       const startTime = Date.now();
 
       const animate = () => {
@@ -306,35 +280,31 @@ function CameraController({ isZoomed, roomPosition, setRotationProgress }: Camer
         const totalProgress = Math.min(elapsed / cameraDuration, 1);
 
         if (isResetting) {
-          // Quick reset - just move camera directly
           const progress = elapsed / cameraDuration;
-          const eased = 1 - Math.pow(1 - progress, 2); // Faster easing
+          const eased = 1 - Math.pow(1 - progress, 2);
           camera.position.lerpVectors(startPos, endPos, eased);
-          setRotationProgress(0); // Reset rotation immediately
+          setRotationProgress(0);
+        } else if (isSwitchingRooms) {
+          setRotationProgress(1);
+          const progress = elapsed / cameraDuration;
+          const eased = 1 - Math.pow(1 - progress, 3);
+          camera.position.lerpVectors(startPos, endPos, eased);
         } else {
-          // Normal zoom animation - Rotation happens first (0-0.8s), then camera moves (0.8-1.0s)
           if (elapsed < rotationDuration) {
-            // Phase 1: Rotate to north while staying in place
             const rotationProgress = elapsed / rotationDuration;
             const eased = 1 - Math.pow(1 - rotationProgress, 3);
             setRotationProgress(eased);
-
-            // Camera stays at start position
             camera.position.copy(startPos);
           } else {
-            // Phase 2: Rotation complete, now move camera
             setRotationProgress(1);
-
             const cameraMoveTime = elapsed - rotationDuration;
             const cameraDurationRemaining = cameraDuration - rotationDuration;
             const cameraProgress = Math.min(cameraMoveTime / cameraDurationRemaining, 1);
             const eased = 1 - Math.pow(1 - cameraProgress, 3);
-
             camera.position.lerpVectors(startPos, endPos, eased);
           }
         }
 
-        // Look at room or center
         const lookAtTarget = roomPosition || new THREE.Vector3(0, 0, 0);
         camera.lookAt(lookAtTarget);
 
@@ -347,7 +317,7 @@ function CameraController({ isZoomed, roomPosition, setRotationProgress }: Camer
     };
 
     animateCamera();
-  }, [isZoomed, roomPosition, camera, setRotationProgress]);
+  }, [isZoomed, roomPosition, camera, setRotationProgress, isSwitchingRooms]);
 
   return null;
 }
@@ -368,21 +338,37 @@ export default function TelosHouseViewer() {
   const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
   const [roomPosition, setRoomPosition] = useState<THREE.Vector3 | null>(null);
   const [rotationProgress, setRotationProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSwitchingRooms, setIsSwitchingRooms] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleRoomClick = (roomName: string, position: THREE.Vector3) => {
+    const wasAlreadyZoomed = isZoomed && roomPosition !== null;
+    setIsSwitchingRooms(wasAlreadyZoomed);
     setSelectedRoom(roomName);
     setRoomPosition(position);
     setIsZoomed(true);
-    setRotationProgress(0); // Reset progress for new animation
+    setRotationProgress(wasAlreadyZoomed ? 1 : 0);
   };
 
   const handleModelClick = () => {
+    setIsSwitchingRooms(false);
     setIsZoomed(true);
-    setRoomPosition(null); // Aerial view without specific room
-    setRotationProgress(0); // Reset progress for new animation
+    setRoomPosition(null);
+    setRotationProgress(0);
   };
 
   const handleReset = () => {
+    setIsSwitchingRooms(false);
     setIsZoomed(false);
     setSelectedRoom(null);
     setRoomPosition(null);
@@ -391,12 +377,12 @@ export default function TelosHouseViewer() {
 
   return (
     <div
-      className="relative w-full h-screen"
+      className="relative w-full h-screen flex flex-col"
       onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Title */}
+      {/* Title - Responsive - Lower on mobile */}
       <h1
-        className="absolute top-8 left-1/2 -translate-x-1/2 z-10 text-6xl font-bold text-white pointer-events-none"
+        className="absolute top-16 md:top-8 left-1/2 -translate-x-1/2 z-10 text-3xl md:text-6xl font-bold text-white pointer-events-none"
         style={{
           textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)',
           letterSpacing: '0.05em'
@@ -405,10 +391,12 @@ export default function TelosHouseViewer() {
         TELOS HOUSE
       </h1>
 
-      <Canvas
-        camera={{ position: [10, 8, 10], fov: 60 }}
-        style={{ background: '#1a1a1a' }}
-      >
+      {/* Canvas container - Smaller on mobile to fit screen */}
+      <div className="flex-1 w-full h-[70vh] md:h-screen">
+        <Canvas
+          camera={{ position: [10, 8, 10], fov: isMobile ? 95 : 60 }}
+          style={{ background: '#1a1a1a', width: '100%', height: '100%' }}
+        >
         {/* Multiple light sources for better visibility */}
         <ambientLight intensity={1.2} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} castShadow />
@@ -420,6 +408,7 @@ export default function TelosHouseViewer() {
           isZoomed={isZoomed}
           roomPosition={roomPosition}
           setRotationProgress={setRotationProgress}
+          isSwitchingRooms={isSwitchingRooms}
         />
 
         <Suspense fallback={<Loader />}>
@@ -447,37 +436,37 @@ export default function TelosHouseViewer() {
             RIGHT: undefined
           }}
         />
-      </Canvas>
+        </Canvas>
+      </div>
 
-      {/* Room Description Overlay */}
-      {selectedRoom && (
-        <div className="absolute top-32 left-4 bg-black bg-opacity-80 text-white p-6 rounded-lg max-w-md">
-          <button
-            onClick={() => setSelectedRoom(null)}
-            className="absolute top-2 right-2 text-white hover:text-gray-300"
-          >
-            ✕
-          </button>
-          <h2 className="text-2xl font-bold mb-2 capitalize">{selectedRoom}</h2>
-          <p className="text-gray-200">{roomDescriptions[selectedRoom]}</p>
-        </div>
-      )}
-
-      {/* Reset Button */}
+      {/* Reset Button - Mobile at top-right below title, Desktop at top-right */}
       {isZoomed && (
         <button
           onClick={handleReset}
-          className="absolute top-32 right-4 bg-black bg-opacity-80 hover:bg-opacity-90 text-white px-6 py-3 rounded-lg backdrop-blur-sm transition-all border border-white border-opacity-30"
+          className="absolute top-32 right-2 md:top-20 md:right-4 bg-black bg-opacity-80 hover:bg-opacity-90 text-white px-6 py-3 md:px-8 md:py-4 rounded-lg backdrop-blur-sm transition-all border border-white border-opacity-30 text-lg md:text-xl z-10"
         >
           Reset
         </button>
       )}
 
-      {/* Instructions */}
-      <div className="absolute bottom-4 left-4 bg-black bg-opacity-60 text-white p-4 rounded-lg">
-        <p className="text-sm">Watch the house rotate automatically</p>
-        <p className="text-sm">Click on the house to zoom to aerial view</p>
-        <p className="text-sm">Click on individual rooms to zoom in close</p>
+      {/* Room Description Overlay - Mobile higher up at bottom, Desktop at top-left */}
+      {selectedRoom && (
+        <div className="absolute bottom-28 left-4 right-4 md:bottom-auto md:top-20 md:left-4 md:right-auto bg-black bg-opacity-90 text-white p-4 md:p-6 rounded-lg md:max-w-md max-h-[40vh] md:max-h-none overflow-y-auto z-10">
+          <button
+            onClick={() => setSelectedRoom(null)}
+            className="absolute top-2 right-2 text-white hover:text-gray-300 text-xl"
+          >
+            ✕
+          </button>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2 capitalize pr-6">{selectedRoom}</h2>
+          <p className="text-base md:text-lg text-gray-200">{roomDescriptions[selectedRoom]}</p>
+        </div>
+      )}
+
+      {/* Instructions - Hide on mobile when room is selected */}
+      <div className={`absolute bottom-4 left-4 bg-black bg-opacity-60 text-white p-3 md:p-4 rounded-lg text-xs md:text-sm ${selectedRoom ? 'hidden md:block' : 'block'}`}>
+        <p>Watch the house rotate automatically</p>
+        <p>Click on individual rooms to explore</p>
       </div>
     </div>
   );
