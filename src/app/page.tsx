@@ -4,10 +4,10 @@ const TelosHouseViewer = dynamic(
   () => import('@/components/TelosHouseViewer'),
   {
     loading: () => (
-      <div className="flex items-center justify-center w-full h-screen bg-[#1a1a1a] text-white">
-        Loading Telos House...
+      <div className="flex items-center justify-center w-full h-screen bg-[color:var(--color-obsidian)] text-[color:var(--color-parchment)] font-label text-[10px] tracking-widest uppercase">
+        ↳ Loading Telos House
       </div>
-    )
+    ),
   }
 );
 

@@ -1,26 +1,159 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-obsidian: #000000;
+  --color-phthalo: #123524;
+  --color-phthalo-deep: #000f08;
+  --color-stark: #ffffff;
+  --color-parchment: #F6FAF6;
+  --color-parchment-mute: #c1c8c1;
+
+  --grid-color: rgba(246, 250, 246, 0.06);
+  --grid-color-strong: rgba(246, 250, 246, 0.12);
+  --glass-bg: rgba(18, 53, 36, 0.18);
+  --glass-bg-strong: rgba(18, 53, 36, 0.32);
+  --glass-border: rgba(246, 250, 246, 0.10);
+
+  --background: var(--color-obsidian);
+  --foreground: var(--color-parchment);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-obsidian: var(--color-obsidian);
+  --color-phthalo: var(--color-phthalo);
+  --color-parchment: var(--color-parchment);
+  --color-stark: var(--color-stark);
+  --font-serif: var(--font-noto-serif);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-space-grotesk);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--color-obsidian);
+  color: var(--color-parchment);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+
+.font-serif-display {
+  font-family: var(--font-noto-serif), "Noto Serif", serif;
+}
+
+.font-label {
+  font-family: var(--font-space-grotesk), "Space Grotesk", monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Blueprint architectural grid */
+.blueprint-grid {
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Glass panels — phthalo tinted, sharp corners */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  border: 1px solid var(--glass-border);
+  border-radius: 0;
+}
+.glass-panel-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  border: 1px solid var(--glass-border);
+  border-radius: 0;
+}
+
+/* Crosshair corner ornaments */
+.tick-corner::before,
+.tick-corner::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--color-parchment);
+  opacity: 0.55;
+}
+.tick-corner::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.tick-corner::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+
+/* Custom scrollbar — phthalo on-brand, never grey */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-phthalo) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-phthalo);
+  border-radius: 0;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover,
+.thin-scroll::-webkit-scrollbar-thumb:active {
+  background: var(--color-phthalo);
+}
+
+/* Cursor-aware spotlight (driven by --mx / --my CSS vars) */
+.cursor-spotlight {
+  background: radial-gradient(
+    600px circle at calc(var(--mx, 50%) ) calc(var(--my, 50%) ),
+    rgba(18, 53, 36, 0.55) 0%,
+    rgba(18, 53, 36, 0.20) 22%,
+    rgba(0, 0, 0, 0) 60%
+  );
+  transition: background-position 80ms linear;
+}
+
+/* Vignette to sink the model into the page */
+.vignette {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* Range slider parchment style (kept simple — purely cosmetic) */
+input[type="range"].parchment-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(246, 250, 246, 0.18);
+  height: 2px;
+}
+input[type="range"].parchment-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--color-parchment);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
 }
