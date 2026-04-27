@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Serif, Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -23,6 +23,14 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Telos House — Architectural Explorer",
   description: "An interactive 3D archive of the Telos House.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // viewport-fit=cover lets env(safe-area-inset-*) work on notched / home-bar
+  // phones, which we use to keep the bottom panel above the home indicator.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

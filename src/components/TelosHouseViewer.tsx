@@ -481,7 +481,7 @@ export default function TelosHouseViewer() {
   return (
     <div
       ref={stageRef}
-      className="relative w-full h-screen overflow-hidden bg-[color:var(--color-obsidian)]"
+      className="relative w-full h-screen overflow-hidden bg-[color:var(--color-obsidian)] flex flex-col md:block"
       onContextMenu={(e) => e.preventDefault()}
       style={{ ['--mx' as string]: '50%', ['--my' as string]: '50%' }}
     >
@@ -490,10 +490,40 @@ export default function TelosHouseViewer() {
       <div className="pointer-events-none absolute inset-0 blueprint-grid opacity-90" />
       <div className="pointer-events-none absolute inset-0 vignette" />
 
-      {/* Canvas — full-bleed on desktop; on mobile, sits in the middle of the
-          page (header above, bottom panel below) so the whole house is visible
-          during reset / auto-rotate and centred on screen. */}
-      <div className="absolute top-[150px] md:top-0 inset-x-0 bottom-[180px] md:bottom-0">
+      {/* ── MOBILE HEADER ── (in flex-col flow, hidden on desktop) */}
+      <div
+        className="md:hidden pointer-events-auto relative z-10 flex-shrink-0 px-5 pb-3"
+        style={{ paddingTop: 'max(1.25rem, env(safe-area-inset-top))' }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="relative min-w-0">
+            <p className="font-label text-[9px] text-[color:var(--color-parchment)] opacity-60 mb-1.5">
+              ↳ The Telos Charter / 04
+            </p>
+            <h1 className="font-serif-display text-2xl leading-[0.95] text-[color:var(--color-stark)]">
+              Telos House
+            </h1>
+            <p className="font-label mt-2 text-[9px] text-[color:var(--color-parchment)] opacity-80">
+              Architectural Explorer
+            </p>
+            <div className="mt-2 h-px w-32 bg-[color:var(--color-parchment)]/30" />
+          </div>
+          <div className="flex-shrink-0">
+            <div className="glass-panel relative tick-corner px-3 py-2">
+              <p className="font-label text-[8px] text-[color:var(--color-parchment)] opacity-50">Status</p>
+              <p className="font-label text-[10px] text-[color:var(--color-stark)] mt-0.5 whitespace-nowrap">
+                {isZoomed ? (selectedRoom ? 'Inspecting' : 'Zoomed') : 'Live'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Canvas wrapper — flex-1 in mobile flow, absolute full-bleed on desktop.
+          Mobile guarantees the canvas only takes whatever vertical space is left
+          after the header and bottom panel, so the bottom panel is never cut off
+          regardless of phone aspect ratio. */}
+      <div className="relative flex-1 min-h-0 md:absolute md:inset-0 md:flex-none">
         <Canvas
           camera={{ position: [10, 8, 10], fov: isMobile ? 95 : 60 }}
           style={{ background: 'transparent', width: '100%', height: '100%' }}
@@ -542,42 +572,75 @@ export default function TelosHouseViewer() {
         </Canvas>
       </div>
 
-      {/* UI layer ──────────────────────────────────────────────────── */}
-      <div className="pointer-events-none relative z-10 flex h-full w-full flex-col p-5 md:p-8">
+      {/* ── MOBILE BOTTOM PANEL ── (in flex-col flow, hidden on desktop)
+          Always present in the mobile layout, swaps Caravan info ↔ Dossier in
+          the same slot, and exposes Reset whenever zoomed. Because this lives
+          in the flex flow as a flex-shrink-0 sibling of the flex-1 canvas, it
+          can never be cut off — the canvas yields whatever vertical space the
+          panel needs at any aspect ratio. */}
+      <div
+        className="md:hidden pointer-events-auto relative z-10 flex-shrink-0 flex flex-col gap-2 px-5 pt-3"
+        style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+      >
+        <div className="glass-panel relative tick-corner px-3 py-2.5">
+          {selectedRoom ? (
+            <RoomDossier
+              roomKey={selectedRoom}
+              onClose={() => setSelectedRoom(null)}
+              compact
+            />
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="font-label text-[9px] text-[color:var(--color-parchment)] opacity-60 flex-shrink-0">
+                Caravan
+              </span>
+              <span className="block h-3 w-px bg-[color:var(--color-parchment)]/30 flex-shrink-0" />
+              <p className="text-[11px] text-[color:var(--color-parchment)]/85 leading-snug flex-1">
+                {isZoomed
+                  ? 'Top-down survey active. Tap a room on the model.'
+                  : 'The structure rotates on its axis. Tap a room to enter.'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {isZoomed && (
+          <button
+            onClick={handleReset}
+            className="self-end px-4 py-2 bg-[color:var(--color-phthalo)] text-[color:var(--color-stark)] font-label text-[10px] hover:bg-[color:var(--color-phthalo)]/80 transition-colors tick-corner relative"
+          >
+            ↩ Reset View
+          </button>
+        )}
+      </div>
+
+      {/* ── DESKTOP UI OVERLAY ── (absolute, hidden on mobile) */}
+      <div className="hidden md:flex pointer-events-none md:absolute md:inset-0 md:z-10 md:h-full md:w-full md:flex-col md:p-8">
         {/* Header */}
         <header className="pointer-events-auto flex items-start justify-between gap-3">
           <div className="relative min-w-0">
-            <p className="font-label text-[9px] sm:text-[10px] text-[color:var(--color-parchment)] opacity-60 mb-1.5 sm:mb-2">
+            <p className="font-label text-[10px] text-[color:var(--color-parchment)] opacity-60 mb-2">
               ↳ The Telos Charter / 04
             </p>
-            <h1 className="font-serif-display text-2xl sm:text-3xl md:text-5xl leading-[0.95] text-[color:var(--color-stark)]">
+            <h1 className="font-serif-display text-5xl leading-[0.95] text-[color:var(--color-stark)]">
               Telos House
             </h1>
-            <p className="font-label mt-2 sm:mt-3 text-[9px] sm:text-[10px] md:text-xs text-[color:var(--color-parchment)] opacity-80">
-              <span className="md:hidden">Architectural Explorer</span>
-              <span className="hidden md:inline">Architectural Explorer · Empty Viewport Edition</span>
+            <p className="font-label mt-3 text-xs text-[color:var(--color-parchment)] opacity-80">
+              Architectural Explorer · Empty Viewport Edition
             </p>
-            <div className="mt-2 sm:mt-3 h-px w-32 sm:w-40 md:w-56 bg-[color:var(--color-parchment)]/30" />
+            <div className="mt-3 h-px w-56 bg-[color:var(--color-parchment)]/30" />
           </div>
 
-          <div className="hidden md:flex items-start gap-2 flex-shrink-0">
+          <div className="flex items-start gap-2 flex-shrink-0">
             <MetaPill label="Project" value="THCRVN/25" />
             <MetaPill label="Status" value={isZoomed ? (selectedRoom ? 'Inspecting' : 'Zoomed') : 'Live Render'} />
           </div>
-          <div className="md:hidden flex-shrink-0">
-            <div className="glass-panel relative tick-corner px-3 py-2">
-              <p className="font-label text-[8px] text-[color:var(--color-parchment)] opacity-50">Status</p>
-              <p className="font-label text-[10px] text-[color:var(--color-stark)] mt-0.5 whitespace-nowrap">
-                {isZoomed ? (selectedRoom ? 'Inspecting' : 'Zoomed') : 'Live'}
-              </p>
-            </div>
-          </div>
         </header>
 
-        {/* Middle row (desktop only) */}
-        <div className="mt-8 hidden md:flex md:flex-1 md:min-h-0 items-stretch justify-between gap-6">
+        {/* Middle row */}
+        <div className="mt-8 flex flex-1 min-h-0 items-stretch justify-between gap-6">
           {/* Left: Room navigation */}
-          <aside className="pointer-events-auto glass-panel relative tick-corner w-[260px] max-w-[44vw] flex-col p-5 hidden md:flex">
+          <aside className="pointer-events-auto glass-panel relative tick-corner w-[260px] max-w-[44vw] flex flex-col p-5">
             <div className="flex items-baseline justify-between mb-5">
               <h3 className="font-label text-[10px] text-[color:var(--color-parchment)] opacity-70">
                 Interior Rooms
@@ -634,7 +697,7 @@ export default function TelosHouseViewer() {
           </aside>
 
           {/* Right: Stats / room dossier */}
-          <aside className="pointer-events-auto glass-panel relative tick-corner w-[280px] max-w-[44vw] p-5 hidden md:block self-start">
+          <aside className="pointer-events-auto glass-panel relative tick-corner w-[280px] max-w-[44vw] p-5 self-start">
             {selectedRoom ? (
               <RoomDossier
                 roomKey={selectedRoom}
@@ -646,51 +709,15 @@ export default function TelosHouseViewer() {
           </aside>
         </div>
 
-        {/* Mobile-only bottom panel — always present, swaps Caravan info ↔ Dossier
-            in the same slot. Room selection on mobile happens by tapping the 3D model.
-            The Reset button stays visible whenever the view is zoomed, including
-            when a room is selected. */}
-        <div className="pointer-events-auto md:hidden mt-auto flex flex-col gap-2">
-          <div className="glass-panel relative tick-corner px-3 py-2.5">
-            {selectedRoom ? (
-              <RoomDossier
-                roomKey={selectedRoom}
-                onClose={() => setSelectedRoom(null)}
-                compact
-              />
-            ) : (
-              <div className="flex items-center gap-3">
-                <span className="font-label text-[9px] text-[color:var(--color-parchment)] opacity-60 flex-shrink-0">
-                  Caravan
-                </span>
-                <span className="block h-3 w-px bg-[color:var(--color-parchment)]/30 flex-shrink-0" />
-                <p className="text-[11px] text-[color:var(--color-parchment)]/85 leading-snug flex-1">
-                  {isZoomed
-                    ? 'Top-down survey active. Tap a room on the model.'
-                    : 'The structure rotates on its axis. Tap a room to enter.'}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {isZoomed && (
-            <button
-              onClick={handleReset}
-              className="self-end px-4 py-2 bg-[color:var(--color-phthalo)] text-[color:var(--color-stark)] font-label text-[10px] hover:bg-[color:var(--color-phthalo)]/80 transition-colors tick-corner relative"
-            >
-              ↩ Reset View
-            </button>
-          )}
-        </div>
 
         {/* Desktop footer */}
-        <footer className="hidden md:flex pointer-events-auto md:mt-auto md:pt-6 md:flex-row md:gap-6 md:items-center justify-between">
-          <div className="glass-panel relative tick-corner md:px-5 md:py-3 flex items-center md:gap-4 flex-1 min-w-0">
-            <span className="font-label md:text-[10px] text-[color:var(--color-parchment)] opacity-60 flex-shrink-0">
+        <footer className="pointer-events-auto mt-auto pt-6 flex flex-row gap-6 items-center justify-between">
+          <div className="glass-panel relative tick-corner px-5 py-3 flex items-center gap-4 flex-1 min-w-0">
+            <span className="font-label text-[10px] text-[color:var(--color-parchment)] opacity-60 flex-shrink-0">
               Caravan
             </span>
             <span className="block h-3 w-px bg-[color:var(--color-parchment)]/30 flex-shrink-0" />
-            <p className="md:text-[12px] text-[color:var(--color-parchment)]/85 leading-snug">
+            <p className="text-[12px] text-[color:var(--color-parchment)]/85 leading-snug">
               {isZoomed
                 ? selectedRoom
                   ? 'Pick another room — on the model or the index — to traverse.'
@@ -704,7 +731,7 @@ export default function TelosHouseViewer() {
             {isZoomed && (
               <button
                 onClick={handleReset}
-                className="group relative tick-corner md:px-6 md:py-3 bg-[color:var(--color-phthalo)] text-[color:var(--color-stark)] font-label text-[10px] hover:bg-[color:var(--color-phthalo)]/80 transition-colors"
+                className="group relative tick-corner px-6 py-3 bg-[color:var(--color-phthalo)] text-[color:var(--color-stark)] font-label text-[10px] hover:bg-[color:var(--color-phthalo)]/80 transition-colors"
               >
                 <span className="relative z-[1]">↩ Reset View</span>
               </button>
@@ -729,7 +756,7 @@ function MetaPill({ label, value }: { label: string; value: string }) {
 
 function CoordinateBadge() {
   return (
-    <div className="glass-panel relative tick-corner px-4 py-2 hidden md:block">
+    <div className="glass-panel relative tick-corner px-4 py-2">
       <p className="font-label text-[9px] text-[color:var(--color-parchment)] opacity-50">Origin</p>
       <p className="font-label text-[11px] text-[color:var(--color-stark)] mt-0.5">
         51.5074°N · 0.1278°W
